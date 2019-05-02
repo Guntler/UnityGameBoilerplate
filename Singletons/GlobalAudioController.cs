@@ -29,6 +29,7 @@ public class GlobalAudioController : MonoBehaviour
         IsEventReady = true;
         eventCtrl.QueueListener(typeof(FadeAudioEvent), new GlobalEventController.Listener(GetInstanceID(), FadeAudioVolumeCallback));
         eventCtrl.QueueListener(typeof(PlayBackgroundClip), new GlobalEventController.Listener(GetInstanceID(), PlayBackgroundClipCallback));
+        eventCtrl.QueueListener(typeof(PlayBackgroundClip), new GlobalEventController.Listener(GetInstanceID(), PlayBackgroundClipCallback));
     }
 
     void Update()
@@ -37,6 +38,12 @@ public class GlobalAudioController : MonoBehaviour
             SetupEvents();
             return;
         }
+    }
+
+    public void PlayOneshotClipCallback(GameEvent e)
+    {
+        PlayOneshotClipEvent ev = (PlayOneshotClipEvent)e;
+        masterSrc.PlayOneShot(ev.AudioObject.Clip, ev.AudioObject.DefaultVolume);
     }
 
     public void PlayBackgroundClipCallback(GameEvent e)

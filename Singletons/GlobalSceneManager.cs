@@ -8,6 +8,7 @@ public class GlobalSceneManager : MonoBehaviour
 {
     public MapSettings CurrentMap;
     public bool IsChangingScene = false;
+    public bool AutoChangeSceneOnBoot = true;
 
     GlobalEventController eventCtrl;
 
@@ -37,10 +38,14 @@ public class GlobalSceneManager : MonoBehaviour
             return;
         }
 
-        if (!isOnBootDone) {
+        if (!isOnBootDone && AutoChangeSceneOnBoot) {
             print("rebooting-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
             //eventCtrl.BroadcastEvent(typeof(PlayBackgroundClip), new PlayBackgroundClip(CurrentMap.BackgroundMusic, 1));
             eventCtrl.BroadcastEvent(typeof(ChangeSceneEvent), new ChangeSceneEvent("TitleScreen", LoadSceneMode.Additive, false));
+            isOnBootDone = true;
+        }
+        else
+        {
             isOnBootDone = true;
         }
 
@@ -86,7 +91,7 @@ public class GlobalSceneManager : MonoBehaviour
         AsyncOperation op = SceneManager.LoadSceneAsync(map.SceneName, mode);
         op.allowSceneActivation = true;
         yield return new WaitUntil(() => op.isDone);
-
+        SceneManager.SetActiveScene(SceneManager.GetSceneByName(map.SceneName));
         
 
 

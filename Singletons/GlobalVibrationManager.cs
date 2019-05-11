@@ -70,6 +70,7 @@ public class GlobalVibrationManager : MonoBehaviour
         }
 
         state = GamePad.GetState((PlayerIndex)playerIdx);
+
         float curRumble = 0;
         float curVibration = 0;
 

@@ -28,7 +28,7 @@ public class GlobalAudioController : MonoBehaviour
 
         IsEventReady = true;
         eventCtrl.QueueListener(typeof(FadeAudioEvent), new GlobalEventController.Listener(GetInstanceID(), FadeAudioVolumeCallback));
-        eventCtrl.QueueListener(typeof(PlayBackgroundClip), new GlobalEventController.Listener(GetInstanceID(), PlayBackgroundClipCallback));
+        eventCtrl.QueueListener(typeof(PlayOneshotClipEvent), new GlobalEventController.Listener(GetInstanceID(), PlayOneshotClipCallback));
         eventCtrl.QueueListener(typeof(PlayBackgroundClip), new GlobalEventController.Listener(GetInstanceID(), PlayBackgroundClipCallback));
     }
 

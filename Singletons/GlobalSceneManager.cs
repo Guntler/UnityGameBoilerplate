@@ -14,7 +14,7 @@ public class GlobalSceneManager : MonoBehaviour
 
     bool isOnBootDone = false;
     public bool IsEventReady = false;
-    // Start is called before the first frame update
+    
     void Start()
     {
         eventCtrl = GlobalEventController.GetInstance();

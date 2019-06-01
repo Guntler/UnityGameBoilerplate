@@ -9,6 +9,7 @@ public class GlobalSceneManager : MonoBehaviour
     public MapSettings CurrentMap;
     public bool IsChangingScene = false;
     public bool AutoChangeSceneOnBoot = true;
+    public string DefaultMap = "TitleScreen";
 
     GlobalEventController eventCtrl;
 
@@ -41,7 +42,7 @@ public class GlobalSceneManager : MonoBehaviour
         if (!isOnBootDone && AutoChangeSceneOnBoot) {
             print("rebooting-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
             //eventCtrl.BroadcastEvent(typeof(PlayBackgroundClip), new PlayBackgroundClip(CurrentMap.BackgroundMusic, 1));
-            eventCtrl.BroadcastEvent(typeof(ChangeSceneEvent), new ChangeSceneEvent("TitleScreen", LoadSceneMode.Additive, false));
+            eventCtrl.BroadcastEvent(typeof(ChangeSceneEvent), new ChangeSceneEvent(DefaultMap, LoadSceneMode.Additive, false));
             isOnBootDone = true;
         }
         else

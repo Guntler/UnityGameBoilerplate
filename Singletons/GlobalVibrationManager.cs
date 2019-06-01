@@ -174,4 +174,11 @@ public class GlobalVibrationManager : MonoBehaviour
             AvailableIds.Enqueue(sEv.id);
         }
     }
+
+    private void OnApplicationQuit()
+    {
+        VibrationEvents.Clear();
+        RumbleEvents.Clear();
+        GamePad.SetVibration((PlayerIndex)playerIdx, 0, 0);
+    }
 }

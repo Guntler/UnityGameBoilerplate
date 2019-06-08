@@ -33,8 +33,9 @@ public class GlobalVibrationManager : MonoBehaviour
     GamePadState state;
 
     public bool IsEventReady = false;
-
-    // Start is called before the first frame update
+    public bool AreEventsPaused = false;
+    public bool IsShakeEnabled = true;
+    
     void Start()
     {
         VibrationEvents = new List<ShakeEvent>();
@@ -59,13 +60,18 @@ public class GlobalVibrationManager : MonoBehaviour
         eventCtrl.QueueListener(typeof(VibrationOverEvent), new GlobalEventController.Listener(GetInstanceID(), VibrationOverEventCallback));
         eventCtrl.QueueListener(typeof(RumbleEvent), new GlobalEventController.Listener(GetInstanceID(), RumbleEventCallback));
         eventCtrl.QueueListener(typeof(RumbleOverEvent), new GlobalEventController.Listener(GetInstanceID(), RumbleOverEventCallback));
+        eventCtrl.QueueListener(typeof(ToggleShakeEvent), new GlobalEventController.Listener(GetInstanceID(), ToggleShakeEventCallback));
     }
-
-    // Update is called once per frame
+    
     void Update()
     {
         if(!IsEventReady) {
             SetupEvents();
+            return;
+        }
+
+        if(AreEventsPaused || !IsShakeEnabled)
+        {
             return;
         }
 
@@ -97,6 +103,13 @@ public class GlobalVibrationManager : MonoBehaviour
         }
 
         return id;
+    }
+
+    public void ToggleShakeEventCallback(GameEvent e)
+    {
+        ToggleShakeEvent ev = (ToggleShakeEvent)e;
+
+        IsShakeEnabled = ev.NewState;
     }
 
     public void VibrationEventCallback(GameEvent e)
@@ -173,6 +186,17 @@ public class GlobalVibrationManager : MonoBehaviour
         if (RumbleEvents.Remove(sEv)) {
             AvailableIds.Enqueue(sEv.id);
         }
+    }
+
+    private void OnApplicationFocus(bool focus)
+    {
+        AreEventsPaused = false;
+    }
+
+    private void OnApplicationPause(bool pause)
+    {
+        AreEventsPaused = true;
+        GamePad.SetVibration((PlayerIndex)playerIdx, 0, 0);
     }
 
     private void OnApplicationQuit()

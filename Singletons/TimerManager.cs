@@ -14,6 +14,7 @@ public class Timer
     public bool IsDone = false;
     public bool DequeueAtEnd = false;
     public bool IsBroadcast = false;
+    public bool IsProgramPaused = false;
 
     public Timer(string id, float time, bool dequeue, TimerCallback callback)
     {
@@ -26,6 +27,11 @@ public class Timer
 
     public void Tick(float time)
     {
+        if (IsProgramPaused)
+        {
+            return;
+        }
+            
         if(!IsDone && !IsPaused) {
             //Debug.Log(ElapsedTime + " -- " + Time + " -- " + Callback);
             ElapsedTime += time;
@@ -47,6 +53,18 @@ public class Timer
     {
         ElapsedTime = 0;
         IsDone = false;
+    }
+
+    public void ToggleProgramPause(bool state)
+    {
+        IsProgramPaused = state;
+    }
+
+    public void Stop()
+    {
+        Callback = null;
+        ElapsedTime = Time;
+        IsDone = true;
     }
 }
 
@@ -141,6 +159,12 @@ public class TimerManager : MonoBehaviour {
 
         for (int i = 0; i < Timers.Count; i++) {
             Timer t = Timers[i];
+
+            if(t.IsPaused)
+            {
+                continue;
+            }
+
             //print("TICKING " + t.Id);
             t.Tick(Time.unscaledDeltaTime);
 
@@ -168,5 +192,40 @@ public class TimerManager : MonoBehaviour {
         Timer l_tToRem = Timers.Find(t => t.Id == id);
         if(l_tToRem != null)
             Timers.Remove(l_tToRem);
+    }
+
+    private void OnApplicationFocus(bool focus)
+    {
+        Timer[] tArr = Timers.ToArray();
+
+        for (int i = 0; i < Timers.Count; i++)
+        {
+            Timer t = Timers[i];
+            t.ToggleProgramPause(false);
+        }
+    }
+
+    private void OnApplicationPause(bool pause)
+    {
+        Timer[] tArr = Timers.ToArray();
+
+        for (int i = 0; i < Timers.Count; i++)
+        {
+            Timer t = Timers[i];
+            t.ToggleProgramPause(true);
+        }
+    }
+
+    private void OnApplicationQuit()
+    {
+        Timer[] tArr = Timers.ToArray();
+
+        for (int i = 0; i < Timers.Count; i++)
+        {
+            Timer t = Timers[i];
+            t.Stop();
+        }
+
+        Timers.Clear();
     }
 }

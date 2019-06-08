@@ -23,3 +23,13 @@ public class RumbleOverEvent : GameEvent
         RumbleId = rumbleId;
     }
 }
+
+public class ToggleShakeEvent: GameEvent
+{
+    public bool NewState;
+
+    public ToggleShakeEvent(bool state)
+    {
+        NewState = state;
+    }
+}

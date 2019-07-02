@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -89,6 +90,35 @@ public class GlobalEventController : MonoBehaviour
 
         return EventList[t].Remove(l);
     }
+
+    class TypeIdStruct
+    {
+        public int id;
+        public Type type;
+        public TypeIdStruct(Type t, int i)
+        {
+            type = t;
+            id = i;
+        }
+    }
+
+    /*public bool RemoveListener(int id)
+    {
+        Type[] types = EventList.Keys.ToArray();
+        List<Listener>[] lists = EventList.Values.ToArray();
+        List<TypeIdStruct> listsToRemove = new List<TypeIdStruct>();
+
+        foreach(List<Listener> ls in lists)
+        {
+            foreach(Listener l in ls)
+            {
+                if(l.ObjectId == id)
+                {
+                    listsToRemove.Add(new TypeIdStruct());
+                }
+            }
+        }
+    }*/
 
     public List<Listener> FindListenerByType(Type t)
     {

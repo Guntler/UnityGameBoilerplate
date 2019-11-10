@@ -10,8 +10,15 @@ public abstract class GameEvent
 {
     public GameEventTypes EventType;
     public string id;
+    public float EventDeferralDelay = 0;
 }
 
+public struct DeferredEvent
+{
+    public GameEvent Event;
+    public float Delay;
+    public System.Type Type;
+}
 
 
 public class GlobalEventController : MonoBehaviour
@@ -33,7 +40,8 @@ public class GlobalEventController : MonoBehaviour
     private static GlobalEventController s_Instance;
     private GlobalEventController() { }
     public Dictionary<Type, List<Listener>> EventList;
-    
+    public List<DeferredEvent> DeferredEvents = new List<DeferredEvent>();
+
     void Start()
     {
         print("Event controller is started");
@@ -66,14 +74,55 @@ public class GlobalEventController : MonoBehaviour
         EventList[t].Add(l);
     }
 
-    public void BroadcastEvent(Type t, GameEvent e)
+    public bool BroadcastEvent(Type t, GameEvent e)
     {
-        
         Listener[] listeners = FindListenerByType(t).ToArray();
+        if (listeners.Length > 0)
+        {
+            foreach (Listener l in listeners)
+            {
+                //print("BROADCASTING TO LISTENER" + l.ObjectId.ToString());
+                l.Callback(e);
+            }
+            return true;
+        }
+        else
+        {
+            if(e.EventDeferralDelay > 0 && !DeferredEvents.Exists(d => d.Type == t))
+            {
+                print("Deferring an event of type: " + t.ToString() + " - " + e.ToString());
+                DeferredEvent dE = new DeferredEvent();
+                dE.Event = e;
+                dE.Type = t;
+                dE.Delay = 0;
+                DeferredEvents.Add(dE);
+            }
+        }
+
+        return false;
         //print("Broadcasting event " + t.ToString() + " to " + listeners.Length + " listeners.");
-        foreach (Listener l in listeners) {
-            //print("BROADCASTING TO LISTENER" + l.ObjectId.ToString());
-            l.Callback(e);
+        
+    }
+
+    void FixedUpdate()
+    {
+        print("Deferred Events: " + DeferredEvents.Count);
+        for(int i=0; i<DeferredEvents.Count; i++)
+        {
+            DeferredEvent dE = DeferredEvents[i];
+            if(BroadcastEvent(dE.Type, dE.Event)) {
+                DeferredEvents.Remove(dE);
+            }
+            else if(dE.Delay < dE.Event.EventDeferralDelay)
+            {
+                dE.Delay += Time.fixedDeltaTime;
+
+                if (dE.Delay >= dE.Event.EventDeferralDelay)
+                {
+                    print("Discarding a deferred event for passing limit: " + dE.Type.ToString());
+                    DeferredEvents.Remove(dE);
+                }
+            }
         }
     }
 

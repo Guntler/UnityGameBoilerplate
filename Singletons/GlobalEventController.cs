@@ -90,7 +90,7 @@ public class GlobalEventController : MonoBehaviour
         {
             if(e.EventDeferralDelay > 0 && !DeferredEvents.Exists(d => d.Type == t))
             {
-                print("Deferring an event of type: " + t.ToString() + " - " + e.ToString());
+                //print("Deferring an event of type: " + t.ToString() + " - " + e.ToString());
                 DeferredEvent dE = new DeferredEvent();
                 dE.Event = e;
                 dE.Type = t;
@@ -106,7 +106,7 @@ public class GlobalEventController : MonoBehaviour
 
     void FixedUpdate()
     {
-        print("Deferred Events: " + DeferredEvents.Count);
+        //print("Deferred Events: " + DeferredEvents.Count);
         for(int i=0; i<DeferredEvents.Count; i++)
         {
             DeferredEvent dE = DeferredEvents[i];
@@ -119,7 +119,7 @@ public class GlobalEventController : MonoBehaviour
 
                 if (dE.Delay >= dE.Event.EventDeferralDelay)
                 {
-                    print("Discarding a deferred event for passing limit: " + dE.Type.ToString());
+                    //print("Discarding a deferred event for passing limit: " + dE.Type.ToString());
                     DeferredEvents.Remove(dE);
                 }
             }

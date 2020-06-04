@@ -21,6 +21,7 @@ public struct DeferredEvent
 }
 
 
+//TODO: Add thread-driven events, which don't affect unity API stuff
 public class GlobalEventController : MonoBehaviour
 {
     [Serializable]
@@ -36,10 +37,12 @@ public class GlobalEventController : MonoBehaviour
         }
     }
 
+    public delegate void SignalCallback();
     public delegate void ListenerCallback(GameEvent e);
     private static GlobalEventController s_Instance;
     private GlobalEventController() { }
     public Dictionary<Type, List<Listener>> EventList;
+    public Dictionary<string, List<SignalCallback>> SignalList;
     public List<DeferredEvent> DeferredEvents = new List<DeferredEvent>();
 
     void Start()
@@ -63,7 +66,17 @@ public class GlobalEventController : MonoBehaviour
             return null;
     }
 
-    public void QueueListener(Type t, Listener l)
+    public void SubscribeSignal(string s, SignalCallback c)
+    {
+        if (!SignalList.ContainsKey(s))
+        {
+            SignalList.Add(s, new List<SignalCallback>());
+        }
+
+        SignalList[s].Add(c);
+    }
+
+    public void SubscribeEvent(Type t, Listener l)
     {
         //print("Registering events for object " + l.ObjectId + " and type " + t.ToString());
         if(!EventList.ContainsKey(t)) {
@@ -101,7 +114,22 @@ public class GlobalEventController : MonoBehaviour
 
         return false;
         //print("Broadcasting event " + t.ToString() + " to " + listeners.Length + " listeners.");
-        
+    }
+
+    public bool BroadcastSignal(string s)
+    {
+        SignalCallback[] listeners = FindCallbacksBySignal(s).ToArray();
+        if (listeners.Length > 0)
+        {
+            foreach (SignalCallback l in listeners)
+            {
+                l();
+            }
+            return true;
+        }
+
+        return false;
+        //print("Broadcasting signal " + t.ToString() + " to " + listeners.Length + " listeners.");
     }
 
     void FixedUpdate()
@@ -168,6 +196,19 @@ public class GlobalEventController : MonoBehaviour
             }
         }
     }*/
+
+    public List<SignalCallback> FindCallbacksBySignal(string s)
+    {
+        if (!SignalList.ContainsKey(s))
+        {
+            lock (EventList)
+            {
+                SignalList.Add(s, new List<SignalCallback>());
+            }
+        }
+
+        return SignalList[s];
+    }
 
     public List<Listener> FindListenerByType(Type t)
     {

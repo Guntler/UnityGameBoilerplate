@@ -30,9 +30,9 @@ public class BlackOverlayUIBehavior : MonoBehaviour
         print("Setting up BlackOverlay Events with id " + GetInstanceID());
 
         IsEventReady = true;
-        GlobalEventController.GetInstance().QueueListener(typeof(UpdateBlackOverlayEvent), new GlobalEventController.Listener(gameObject.GetInstanceID(), UpdateBlackOverlayCallback));
-        GlobalEventController.GetInstance().QueueListener(typeof(ShowBlackOverlayEvent), new GlobalEventController.Listener(gameObject.GetInstanceID(), ShowBlackOverlay));
-        GlobalEventController.GetInstance().QueueListener(typeof(HideBlackOverlayEvent), new GlobalEventController.Listener(gameObject.GetInstanceID(), HideBlackOverlay));
+        GlobalEventController.GetInstance().SubscribeEvent(typeof(UpdateBlackOverlayEvent), new GlobalEventController.Listener(gameObject.GetInstanceID(), UpdateBlackOverlayCallback));
+        GlobalEventController.GetInstance().SubscribeEvent(typeof(ShowBlackOverlayEvent), new GlobalEventController.Listener(gameObject.GetInstanceID(), ShowBlackOverlay));
+        GlobalEventController.GetInstance().SubscribeEvent(typeof(HideBlackOverlayEvent), new GlobalEventController.Listener(gameObject.GetInstanceID(), HideBlackOverlay));
     }
 
     // Update is called once per frame

@@ -2,8 +2,27 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public class PlaySfxEvent : GameEvent
+{
+    public string sfxSettingName;
+}
+
 public class GlobalAudioController : MonoBehaviour
 {
+    public int GlobalMusicSrcs = 2;
+    public int GlobalVoiceSrcs = 2;
+    public int MaxGlobalSfxSrcs = 10;
+
+    Queue<AudioSource> sfxSrcQueue;
+    List<SfxInstance> sfxInstanceList;
+
+    struct SfxInstance
+    {
+        public AudioSource sfxSrc;
+        public AudioSettings sfxSetting;
+        public bool isPaused;
+    }
+
     GlobalEventController eventCtrl;
     AudioSource masterSrc;
 
@@ -19,7 +38,11 @@ public class GlobalAudioController : MonoBehaviour
         DontDestroyOnLoad(this);
 
         eventCtrl = GlobalEventController.GetInstance();
-        
+
+        for(int i=0; i<MaxGlobalSfxSrcs; i++)
+        {
+            sfxSrcQueue.Enqueue(masterSrcObj.AddComponent<AudioSource>());
+        }
     }
 
     void SetupEvents()
@@ -27,9 +50,9 @@ public class GlobalAudioController : MonoBehaviour
         print("Setting up Audio Events with id " + GetInstanceID());
 
         IsEventReady = true;
-        eventCtrl.QueueListener(typeof(FadeAudioEvent), new GlobalEventController.Listener(GetInstanceID(), FadeAudioVolumeCallback));
-        eventCtrl.QueueListener(typeof(PlayOneshotClipEvent), new GlobalEventController.Listener(GetInstanceID(), PlayOneshotClipCallback));
-        eventCtrl.QueueListener(typeof(PlayBackgroundClip), new GlobalEventController.Listener(GetInstanceID(), PlayBackgroundClipCallback));
+        eventCtrl.SubscribeEvent(typeof(FadeAudioEvent), new GlobalEventController.Listener(GetInstanceID(), FadeAudioVolumeCallback));
+        eventCtrl.SubscribeEvent(typeof(PlayOneshotClipEvent), new GlobalEventController.Listener(GetInstanceID(), PlayOneshotClipCallback));
+        eventCtrl.SubscribeEvent(typeof(PlayBackgroundClip), new GlobalEventController.Listener(GetInstanceID(), PlayBackgroundClipCallback));
     }
 
     void Update()
@@ -38,6 +61,29 @@ public class GlobalAudioController : MonoBehaviour
             SetupEvents();
             return;
         }
+    }
+
+    void FixedUpdate()
+    {
+        for(int i=0; i<sfxInstanceList.Count; i++)
+        {
+            SfxInstance inst = sfxInstanceList[i];
+            if (!inst.sfxSrc.isPlaying && !inst.isPaused)
+            {
+                sfxInstanceList.Remove(inst);
+                i--;
+
+                inst.sfxSrc.clip = null;
+                inst.sfxSrc.loop = false;
+                inst.sfxSrc.volume = 1;
+                sfxSrcQueue.Enqueue(inst.sfxSrc);
+            }
+        }
+    }
+
+    void PlaySfxCallback(GameEvent e)
+    {
+
     }
 
     public void PlayOneshotClipCallback(GameEvent e)

@@ -28,8 +28,8 @@ public class GlobalSceneManager : MonoBehaviour
         print("Setting up Scene Events with id " + GetInstanceID());
 
         IsEventReady = true;
-        eventCtrl.QueueListener(typeof(ChangeSceneEvent), new GlobalEventController.Listener(GetInstanceID(), ChangeScene));
-        eventCtrl.QueueListener(typeof(ChangeUnitySceneEvent), new GlobalEventController.Listener(GetInstanceID(), ChangeUnityScene));
+        eventCtrl.SubscribeEvent(typeof(ChangeSceneEvent), new GlobalEventController.Listener(GetInstanceID(), ChangeScene));
+        eventCtrl.SubscribeEvent(typeof(ChangeUnitySceneEvent), new GlobalEventController.Listener(GetInstanceID(), ChangeUnityScene));
     }
 
     void Update()
@@ -61,7 +61,7 @@ public class GlobalSceneManager : MonoBehaviour
         bool unloadPrev = ((ChangeSceneEvent)e).DoUnloadPrevScene;
         print("Beginning change scene " + name);
         eventCtrl.BroadcastEvent(typeof(ShowBlackOverlayEvent), new ShowBlackOverlayEvent());
-        eventCtrl.QueueListener(typeof(TransitionOverBlackOverlayEvent), new GlobalEventController.Listener(this.GetInstanceID(),
+        eventCtrl.SubscribeEvent(typeof(TransitionOverBlackOverlayEvent), new GlobalEventController.Listener(this.GetInstanceID(),
                                                                                                                     (GameEvent ev) => {
                                                                                                                         eventCtrl.BroadcastEvent(typeof(ChangeUnitySceneEvent), new ChangeUnitySceneEvent(name, mode, unloadPrev));
                                                                                                                     }));
@@ -90,12 +90,10 @@ public class GlobalSceneManager : MonoBehaviour
         }
 
         AsyncOperation op = SceneManager.LoadSceneAsync(map.SceneName, mode);
+        op.completed += (AsyncOperation o) => { SceneManager.SetActiveScene(SceneManager.GetSceneByName(map.SceneName)); };
         op.allowSceneActivation = true;
         yield return new WaitUntil(() => op.isDone);
-        SceneManager.SetActiveScene(SceneManager.GetSceneByName(map.SceneName));
         
-
-
         CurrentMap = map;
 
         IsChangingScene = false;

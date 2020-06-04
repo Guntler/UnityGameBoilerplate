@@ -43,7 +43,8 @@ public class GlobalVibrationManager : MonoBehaviour
         AvailableIds = new Queue<int>();
 
         eventCtrl = GlobalEventController.GetInstance();
-        
+
+        Invoke("SetupEvents", 0);
     }
 
     private void Awake()
@@ -56,20 +57,15 @@ public class GlobalVibrationManager : MonoBehaviour
         print("Setting up Vibration Events with id " + GetInstanceID());
 
         IsEventReady = true;
-        eventCtrl.QueueListener(typeof(VibrationEvent), new GlobalEventController.Listener(GetInstanceID(), VibrationEventCallback));
-        eventCtrl.QueueListener(typeof(VibrationOverEvent), new GlobalEventController.Listener(GetInstanceID(), VibrationOverEventCallback));
-        eventCtrl.QueueListener(typeof(RumbleEvent), new GlobalEventController.Listener(GetInstanceID(), RumbleEventCallback));
-        eventCtrl.QueueListener(typeof(RumbleOverEvent), new GlobalEventController.Listener(GetInstanceID(), RumbleOverEventCallback));
-        eventCtrl.QueueListener(typeof(ToggleShakeEvent), new GlobalEventController.Listener(GetInstanceID(), ToggleShakeEventCallback));
+        eventCtrl.SubscribeEvent(typeof(VibrationEvent), new GlobalEventController.Listener(GetInstanceID(), VibrationEventCallback));
+        eventCtrl.SubscribeEvent(typeof(VibrationOverEvent), new GlobalEventController.Listener(GetInstanceID(), VibrationOverEventCallback));
+        eventCtrl.SubscribeEvent(typeof(RumbleEvent), new GlobalEventController.Listener(GetInstanceID(), RumbleEventCallback));
+        eventCtrl.SubscribeEvent(typeof(RumbleOverEvent), new GlobalEventController.Listener(GetInstanceID(), RumbleOverEventCallback));
+        eventCtrl.SubscribeEvent(typeof(ToggleShakeEvent), new GlobalEventController.Listener(GetInstanceID(), ToggleShakeEventCallback));
     }
     
     void Update()
     {
-        if(!IsEventReady) {
-            SetupEvents();
-            return;
-        }
-
         if(AreEventsPaused || !IsShakeEnabled)
         {
             return;

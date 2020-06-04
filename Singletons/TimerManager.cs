@@ -87,11 +87,11 @@ public class TimerManager : MonoBehaviour {
         print("Setting up Timer Events with id " + GetInstanceID());
 
         IsEventReady = true;
-        eventCtrl.QueueListener(typeof(StartTimerEvent), new GlobalEventController.Listener(GetInstanceID(), StartTimerCallback));
-        eventCtrl.QueueListener(typeof(TimerOverEvent), new GlobalEventController.Listener(GetInstanceID(), TimerOverCallback));
-        eventCtrl.QueueListener(typeof(PauseTimerEvent), new GlobalEventController.Listener(GetInstanceID(), PauseTimerCallback));
-        eventCtrl.QueueListener(typeof(ResumeTimerEvent), new GlobalEventController.Listener(GetInstanceID(), ResumeTimerCallback));
-        eventCtrl.QueueListener(typeof(StopTimerEvent), new GlobalEventController.Listener(GetInstanceID(), StopTimerCallback));
+        eventCtrl.SubscribeEvent(typeof(StartTimerEvent), new GlobalEventController.Listener(GetInstanceID(), StartTimerCallback));
+        eventCtrl.SubscribeEvent(typeof(TimerOverEvent), new GlobalEventController.Listener(GetInstanceID(), TimerOverCallback));
+        eventCtrl.SubscribeEvent(typeof(PauseTimerEvent), new GlobalEventController.Listener(GetInstanceID(), PauseTimerCallback));
+        eventCtrl.SubscribeEvent(typeof(ResumeTimerEvent), new GlobalEventController.Listener(GetInstanceID(), ResumeTimerCallback));
+        eventCtrl.SubscribeEvent(typeof(StopTimerEvent), new GlobalEventController.Listener(GetInstanceID(), StopTimerCallback));
     }
 
     void Awake()

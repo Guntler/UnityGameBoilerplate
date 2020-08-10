@@ -68,25 +68,20 @@ public class Timer
     }
 }
 
-public class TimerManager : MonoBehaviour {
-    GlobalEventController eventCtrl;
-
+public class TimerManager : EventDrivenBehavior
+{
     /*private static TimerManager s_Instance;
     private TimerManager() { }*/
 
     public List<Timer> Timers = new List<Timer>();
+    
 
-    public bool IsEventReady = false;
-
-	void Start () {
-        eventCtrl = GlobalEventController.GetInstance();
-    }
-
-    void SetupEvents()
+    protected override void InitEvents()
     {
+        base.InitEvents();
+
         print("Setting up Timer Events with id " + GetInstanceID());
 
-        IsEventReady = true;
         eventCtrl.SubscribeEvent(typeof(StartTimerEvent), new GlobalEventController.Listener(GetInstanceID(), StartTimerCallback));
         eventCtrl.SubscribeEvent(typeof(TimerOverEvent), new GlobalEventController.Listener(GetInstanceID(), TimerOverCallback));
         eventCtrl.SubscribeEvent(typeof(PauseTimerEvent), new GlobalEventController.Listener(GetInstanceID(), PauseTimerCallback));
@@ -151,9 +146,8 @@ public class TimerManager : MonoBehaviour {
         }
     }
     
-    void Update () {
-        if(!IsEventReady)
-            SetupEvents();
+    void Update ()
+    {
 
         Timer[] tArr = Timers.ToArray();
 
@@ -216,7 +210,7 @@ public class TimerManager : MonoBehaviour {
         }
     }
 
-    private void OnApplicationQuit()
+    protected override void OnApplicationQuit()
     {
         Timer[] tArr = Timers.ToArray();
 

@@ -7,7 +7,7 @@ public class PlaySfxEvent : GameEvent
     public string sfxSettingName;
 }
 
-public class GlobalAudioController : MonoBehaviour
+public class GlobalAudioController : EventDrivenBehavior
 {
     public int GlobalMusicSrcs = 2;
     public int GlobalVoiceSrcs = 2;
@@ -22,45 +22,39 @@ public class GlobalAudioController : MonoBehaviour
         public AudioSettings sfxSetting;
         public bool isPaused;
     }
-
-    GlobalEventController eventCtrl;
+    
     AudioSource masterSrc;
 
-    public bool IsEventReady = false;
-
-    void Start()
+    protected override void Start()
     {
+        base.Start();
+
+        sfxSrcQueue = new Queue<AudioSource>();
+        sfxInstanceList = new List<SfxInstance>();
+
         GameObject masterSrcObj = new GameObject("MasterAudioSourceObject");
         masterSrcObj.transform.parent = transform;
 
         masterSrc = masterSrcObj.AddComponent<AudioSource>();
 
         DontDestroyOnLoad(this);
-
-        eventCtrl = GlobalEventController.GetInstance();
-
+        
         for(int i=0; i<MaxGlobalSfxSrcs; i++)
         {
             sfxSrcQueue.Enqueue(masterSrcObj.AddComponent<AudioSource>());
         }
+
     }
 
-    void SetupEvents()
+    protected override void InitEvents()
     {
+        base.InitEvents();
+
         print("Setting up Audio Events with id " + GetInstanceID());
 
-        IsEventReady = true;
         eventCtrl.SubscribeEvent(typeof(FadeAudioEvent), new GlobalEventController.Listener(GetInstanceID(), FadeAudioVolumeCallback));
         eventCtrl.SubscribeEvent(typeof(PlayOneshotClipEvent), new GlobalEventController.Listener(GetInstanceID(), PlayOneshotClipCallback));
         eventCtrl.SubscribeEvent(typeof(PlayBackgroundClip), new GlobalEventController.Listener(GetInstanceID(), PlayBackgroundClipCallback));
-    }
-
-    void Update()
-    {
-        if (!IsEventReady) {
-            SetupEvents();
-            return;
-        }
     }
 
     void FixedUpdate()

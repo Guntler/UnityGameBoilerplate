@@ -6,7 +6,7 @@ using UnityEngine;
 using XInputDotNetPure;
 //#endif
 
-public class GlobalVibrationManager : MonoBehaviour
+public class GlobalVibrationManager : EventDrivenBehavior
 {
     /**
      * Works for both vibration and rumble
@@ -27,24 +27,20 @@ public class GlobalVibrationManager : MonoBehaviour
     List<ShakeEvent> RumbleEvents;
     Queue<int> AvailableIds;
     int latestId = 0;
-
-    GlobalEventController eventCtrl;
+    
     int playerIdx = 0;
     GamePadState state;
-
-    public bool IsEventReady = false;
+    
     public bool AreEventsPaused = false;
     public bool IsShakeEnabled = true;
-    
-    void Start()
+
+    protected override void Start()
     {
+        base.Start();
+
         VibrationEvents = new List<ShakeEvent>();
         RumbleEvents = new List<ShakeEvent>();
         AvailableIds = new Queue<int>();
-
-        eventCtrl = GlobalEventController.GetInstance();
-
-        Invoke("SetupEvents", 0);
     }
 
     private void Awake()
@@ -52,18 +48,32 @@ public class GlobalVibrationManager : MonoBehaviour
         DontDestroyOnLoad(this);
     }
 
-    void SetupEvents()
+    protected override void InitEvents()
     {
-        print("Setting up Vibration Events with id " + GetInstanceID());
+        base.InitEvents();
 
-        IsEventReady = true;
+        print("Setting up Vibration Events with id " + GetInstanceID());
+        
         eventCtrl.SubscribeEvent(typeof(VibrationEvent), new GlobalEventController.Listener(GetInstanceID(), VibrationEventCallback));
         eventCtrl.SubscribeEvent(typeof(VibrationOverEvent), new GlobalEventController.Listener(GetInstanceID(), VibrationOverEventCallback));
         eventCtrl.SubscribeEvent(typeof(RumbleEvent), new GlobalEventController.Listener(GetInstanceID(), RumbleEventCallback));
         eventCtrl.SubscribeEvent(typeof(RumbleOverEvent), new GlobalEventController.Listener(GetInstanceID(), RumbleOverEventCallback));
         eventCtrl.SubscribeEvent(typeof(ToggleShakeEvent), new GlobalEventController.Listener(GetInstanceID(), ToggleShakeEventCallback));
     }
-    
+
+    protected override void UnsubEvents()
+    {
+        base.UnsubEvents();
+
+        print("Destroying Vibration Events with id " + GetInstanceID());
+
+        eventCtrl.RemoveListener(typeof(VibrationEvent), VibrationEventCallback);
+        eventCtrl.RemoveListener(typeof(VibrationOverEvent), VibrationOverEventCallback);
+        eventCtrl.RemoveListener(typeof(RumbleEvent), RumbleEventCallback);
+        eventCtrl.RemoveListener(typeof(RumbleOverEvent), RumbleOverEventCallback);
+        eventCtrl.RemoveListener(typeof(ToggleShakeEvent), ToggleShakeEventCallback);
+    }
+
     void Update()
     {
         if(AreEventsPaused || !IsShakeEnabled)
@@ -195,8 +205,9 @@ public class GlobalVibrationManager : MonoBehaviour
         GamePad.SetVibration((PlayerIndex)playerIdx, 0, 0);
     }
 
-    private void OnApplicationQuit()
+    protected override void OnApplicationQuit()
     {
+        base.OnApplicationQuit();
         VibrationEvents.Clear();
         RumbleEvents.Clear();
         GamePad.SetVibration((PlayerIndex)playerIdx, 0, 0);

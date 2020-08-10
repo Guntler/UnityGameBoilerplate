@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class BlackOverlayUIBehavior : MonoBehaviour
+public class BlackOverlayUIBehavior : EventDrivenBehavior
 {
     public GlobalEventController.ListenerCallback UpdateBlackOverlayCallback;
     public bool IsShown = false;
@@ -12,41 +12,36 @@ public class BlackOverlayUIBehavior : MonoBehaviour
     Image blackOverlayImg;
     Color targetColor;
 
-    public bool IsEventReady = false;
-
     private void Awake()
     {
         UpdateBlackOverlayCallback = UpdateBlackOverlayListener;
     }
-    // Start is called before the first frame update
-    void Start()
+
+    protected override void Start()
     {
-        
+        base.Start();
+
         blackOverlayImg = GetComponent<Image>();
     }
 
-    void SetupEvents()
+    protected override void InitEvents()
     {
+        base.InitEvents();
+
         print("Setting up BlackOverlay Events with id " + GetInstanceID());
 
-        IsEventReady = true;
-        GlobalEventController.GetInstance().SubscribeEvent(typeof(UpdateBlackOverlayEvent), new GlobalEventController.Listener(gameObject.GetInstanceID(), UpdateBlackOverlayCallback));
-        GlobalEventController.GetInstance().SubscribeEvent(typeof(ShowBlackOverlayEvent), new GlobalEventController.Listener(gameObject.GetInstanceID(), ShowBlackOverlay));
-        GlobalEventController.GetInstance().SubscribeEvent(typeof(HideBlackOverlayEvent), new GlobalEventController.Listener(gameObject.GetInstanceID(), HideBlackOverlay));
+        eventCtrl.SubscribeEvent(typeof(UpdateBlackOverlayEvent), new GlobalEventController.Listener(gameObject.GetInstanceID(), UpdateBlackOverlayCallback));
+        eventCtrl.SubscribeEvent(typeof(ShowBlackOverlayEvent), new GlobalEventController.Listener(gameObject.GetInstanceID(), ShowBlackOverlay));
+        eventCtrl.SubscribeEvent(typeof(HideBlackOverlayEvent), new GlobalEventController.Listener(gameObject.GetInstanceID(), HideBlackOverlay));
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (!IsEventReady) {
-            SetupEvents();
-            return;
-        }
-
         if (IsProcessing) {
             if (blackOverlayImg.color == targetColor) {
                 IsProcessing = false;
-                GlobalEventController.GetInstance().BroadcastEvent(typeof(TransitionOverBlackOverlayEvent), new TransitionOverBlackOverlayEvent());
+                eventCtrl.BroadcastEvent(typeof(TransitionOverBlackOverlayEvent), new TransitionOverBlackOverlayEvent());
             }
         }
     }

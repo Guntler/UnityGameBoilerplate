@@ -2,12 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayOneshotClipEvent : GameEvent
+public class PlayOneshotClipEvent : PlayAudioClip
 {
-    public AudioSettings AudioObject;
-
-    public PlayOneshotClipEvent(AudioSettings a) : base()
+    public PlayOneshotClipEvent(AudioSettings clip, GlobalAudioController.AudioClipInfoCallback call, float volume = -1.0f, float rate = 2, float delay = 0.05f, bool loop = false) : base(clip, call, volume, rate, delay, loop)
     {
-        AudioObject = a;
     }
 }

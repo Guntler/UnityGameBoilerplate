@@ -128,7 +128,7 @@ public class GlobalSceneManager : EventDrivenBehavior
         eventCtrl.BroadcastEvent(typeof(HideBlackOverlayEvent), new HideBlackOverlayEvent());
 
         if (map.BackgroundMusic != null) {
-            eventCtrl.BroadcastEvent(typeof(PlayBackgroundClip), new PlayBackgroundClip(CurrentMap.BackgroundMusic));
+            eventCtrl.BroadcastEvent(typeof(PlayBackgroundClip), new PlayBackgroundClip(CurrentMap.BackgroundMusic, null));
         }
     }
 }

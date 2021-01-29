@@ -7,12 +7,17 @@ public class StartTimerEvent : GameEvent
     public string TimerId;
     public float Duration;
     public TimerCallback Callback;
+    public TimerInfoCallback OnStart, OnTick, OnPause;
 
-    public StartTimerEvent(string timerId, float duration, TimerCallback callback)
+    public StartTimerEvent(string timerId, float duration, TimerCallback callback, TimerInfoCallback start = null, TimerInfoCallback tick = null, TimerInfoCallback pause = null)
     {
         TimerId = timerId;
         Duration = duration;
         Callback = callback;
+
+        OnStart = start;
+        OnTick = tick;
+        OnPause = pause;
     }
 }
 

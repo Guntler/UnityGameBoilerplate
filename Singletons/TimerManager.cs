@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public delegate void TimerCallback();
+public delegate void TimerInfoCallback(Timer timer);
 
 public class Timer
 {
@@ -16,14 +17,19 @@ public class Timer
     public bool IsBroadcast = false;
     public bool IsProgramPaused = false;
 
-    public Timer(string id, float time, bool dequeue, TimerCallback callback)
+    public TimerInfoCallback OnStart, OnTick, OnPause;
+
+    public Timer(string id, float time, bool dequeue, TimerCallback callback, TimerInfoCallback start =null, TimerInfoCallback tick = null, TimerInfoCallback pause = null)
     {
         Id = id;
         Time = time;
         DequeueAtEnd = dequeue;
 
         Callback = callback;
-    }
+        OnStart = start;
+        OnTick = tick;
+        OnPause = pause;
+}
 
     public void Tick(float time)
     {
@@ -39,14 +45,21 @@ public class Timer
 
             if (IsDone) {
                 ElapsedTime = Time;
-                if(Callback != null) {
-                    //Debug.Log("CALLING CALLBACK");
-                    Callback();
-                }
+                //Debug.Log("CALLING CALLBACK");
+                Callback?.Invoke();
+            }
+            else
+            {
+                OnTick?.Invoke(this);
             }
         }
         else {
         }
+    }
+
+    public float TimeRemaining()
+    {
+        return Time - ElapsedTime;
     }
 
     public void Restart()
@@ -57,6 +70,7 @@ public class Timer
 
     public void ToggleProgramPause(bool state)
     {
+        OnPause?.Invoke(this);
         IsProgramPaused = state;
     }
 
@@ -106,7 +120,7 @@ public class TimerManager : EventDrivenBehavior
     public void StartTimerCallback(GameEvent e)
     {
         StartTimerEvent ev = (StartTimerEvent)e;
-        Timers.Add(new Timer(ev.TimerId, ev.Duration, true, ev.Callback));
+        Timers.Add(new Timer(ev.TimerId, ev.Duration, true, ev.Callback, ev.OnStart, ev.OnTick, ev.OnPause));
     }
 
     public void PauseTimerCallback(GameEvent e)

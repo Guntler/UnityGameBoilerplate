@@ -54,7 +54,7 @@ public class GlobalEventController : MonoBehaviour
     void Awake()
     {
         print("Event controller is awake");
-        DontDestroyOnLoad(this);
+        //DontDestroyOnLoad(this);
         s_Instance = this;
     }
 

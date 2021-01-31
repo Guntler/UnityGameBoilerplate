@@ -45,7 +45,7 @@ public class GlobalVibrationManager : EventDrivenBehavior
 
     private void Awake()
     {
-        DontDestroyOnLoad(this);
+        //DontDestroyOnLoad(this);
     }
 
     protected override void InitEvents()

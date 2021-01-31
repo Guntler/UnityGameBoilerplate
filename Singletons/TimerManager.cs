@@ -103,10 +103,20 @@ public class TimerManager : EventDrivenBehavior
         eventCtrl.SubscribeEvent(typeof(StopTimerEvent), new GlobalEventController.Listener(GetInstanceID(), StopTimerCallback));
     }
 
+    protected override void UnsubEvents()
+    {
+        base.UnsubEvents();
+        eventCtrl.RemoveListener(typeof(StartTimerEvent), StartTimerCallback);
+        eventCtrl.RemoveListener(typeof(TimerOverEvent), TimerOverCallback);
+        eventCtrl.RemoveListener(typeof(PauseTimerEvent), PauseTimerCallback);
+        eventCtrl.RemoveListener(typeof(ResumeTimerEvent), ResumeTimerCallback);
+        eventCtrl.RemoveListener(typeof(StopTimerEvent), StopTimerCallback);
+    }
+
     void Awake()
     {
         //s_Instance = this;
-        DontDestroyOnLoad(this);
+        //DontDestroyOnLoad(this);
     }
 
     /*public static TimerManager GetInstance()

@@ -50,7 +50,7 @@ public class GlobalAudioController : EventDrivenBehavior
 
         masterSrc = masterSrcObj.AddComponent<AudioSource>();
 
-        DontDestroyOnLoad(this);
+        //DontDestroyOnLoad(this);
         
         for(int i=0; i<GlobalMusicSrcs; i++)
         {

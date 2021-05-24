@@ -29,7 +29,7 @@ public class Timer
         OnStart = start;
         OnTick = tick;
         OnPause = pause;
-}
+    }
 
     public void Tick(float time)
     {
@@ -156,7 +156,10 @@ public class TimerManager : EventDrivenBehavior
         StopTimerEvent ev = (StopTimerEvent)e;
         Timer t = Timers.Find(tT => tT.Id == ev.TimerId);
         if(t != null)
-            t.IsDone = true;
+        {
+            t.Stop();
+        }
+            
         //eventCtrl.BroadcastEvent(typeof(TimerOverEvent), new TimerOverEvent(ev.TimerId));
     }
 

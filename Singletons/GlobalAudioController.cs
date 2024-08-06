@@ -183,7 +183,7 @@ public class GlobalAudioController : EventDrivenBehavior
 
     public IEnumerator FadeAudioVolume(AudioSource src, float target, float rate, float delay)
     {
-        while (!Utilities.FloatApprox(src.volume, target, 0.1f)) {
+        while (!UtilitiesGame.FloatApprox(src.volume, target, 0.1f)) {
             if (!src)
                 break;
             src.volume = Mathf.Lerp(src.volume, target, rate * Time.deltaTime);

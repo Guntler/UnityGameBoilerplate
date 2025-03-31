@@ -6,7 +6,6 @@ public class GameInstance : EventDrivenBehavior
 {
     //TODO: should be kept??
     public GameObject PlayerObject;
-
     protected float goalTimeScale = 1.0f;
     protected float realTimeScale = 1.0f;
 

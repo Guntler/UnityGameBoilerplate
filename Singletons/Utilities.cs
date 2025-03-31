@@ -1,10 +1,23 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using Unity.Burst.CompilerServices;
 using UnityEngine;
 using UnityEngine.UI;
 
-public static class Utilities
+public static class UtilitiesGame
 {
+    [Serializable]
+    public struct StickSector
+    {
+        [SerializeField]
+        string SectorId;
+        [SerializeField]
+        float AngleA;
+        [SerializeField]
+        float AngleB;
+    }
+
     /**
      * https://answers.unity.com/questions/1105437/rotate-vector3-manually.html
      */
@@ -45,7 +58,7 @@ public static class Utilities
 
     public static IEnumerator LerpColor(Material m, Color target, float rate, float delay)
     {
-        while (!Utilities.ColorApprox(m.color, target, 0.1f, 0.1f, 0.1f, 0.1f)) {
+        while (!UtilitiesGame.ColorApprox(m.color, target, 0.1f, 0.1f, 0.1f, 0.1f)) {
             if (!m)
                 break;
             m.color = Color.Lerp(m.color, target, rate * Time.deltaTime);
@@ -59,7 +72,7 @@ public static class Utilities
 
     public static IEnumerator LerpColor(Image i, Color target, float rate, float delay)
     {
-        while (!Utilities.ColorApprox(i.color, target, 0.1f, 0.1f, 0.1f, 0.1f)) {
+        while (!UtilitiesGame.ColorApprox(i.color, target, 0.1f, 0.1f, 0.1f, 0.1f)) {
             if (!i)
                 break;
             i.color = Color.Lerp(i.color, target, rate * Time.deltaTime);
@@ -73,7 +86,7 @@ public static class Utilities
 
     public static IEnumerator LerpColor(Text t, Color target, float rate, float delay)
     {
-        while (!Utilities.ColorApprox(t.color, target, 0.1f, 0.1f, 0.1f, 0.1f)) {
+        while (!UtilitiesGame.ColorApprox(t.color, target, 0.1f, 0.1f, 0.1f, 0.1f)) {
             if (!t)
                 break;
             t.color = Color.Lerp(t.color, target, rate * Time.deltaTime);
@@ -87,7 +100,7 @@ public static class Utilities
 
     public static IEnumerator LerpVolume(AudioSource src, float targetVolume, float rate, float delay)
     {
-        while (!Utilities.FloatApprox(src.volume, targetVolume, 0.005f)) {
+        while (!UtilitiesGame.FloatApprox(src.volume, targetVolume, 0.005f)) {
             if (!src)
                 break;
 
@@ -99,5 +112,25 @@ public static class Utilities
         if (src)
             src.volume = targetVolume;
         yield return null;
+    }
+
+    public static bool V2Equals(Vector2 a, Vector2 b)
+    {
+        return Vector2.SqrMagnitude(a - b) < 0.0001f;
+    }
+
+    public static bool V3Equals(Vector3 a, Vector3 b)
+    {
+        return Vector3.SqrMagnitude(a - b) < 0.0001f;
+    }
+
+    /// <summary>
+    /// Creates and combines the InstanceID of an owner object with a specified objString. Often used for timers.
+    /// </summary>
+    /// <param name="owner"></param>
+    /// <param name="objString"></param>
+    public static void MakeGameObjectString(GameObject owner, ref string objString)
+    {
+        objString = objString + owner.GetInstanceID();
     }
 }

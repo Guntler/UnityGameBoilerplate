@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// TODO: Add ref field for Timer Obj Id
+/// </summary>
 public class StartTimerEvent : GameEvent
 {
     public string TimerId;

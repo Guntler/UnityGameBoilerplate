@@ -11,6 +11,8 @@ public abstract class GameEvent
     public GameEventTypes EventType;
     public string id;
     public float EventDeferralDelay = 0;
+    public float TimeHeld;
+    public float FramesHeld;
 }
 
 public struct DeferredEvent

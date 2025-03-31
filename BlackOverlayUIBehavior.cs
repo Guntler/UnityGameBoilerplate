@@ -61,14 +61,14 @@ public class BlackOverlayUIBehavior : EventDrivenBehavior
     {
         IsProcessing = true;
         targetColor = Color.black;
-        StartCoroutine(Utilities.LerpColor(blackOverlayImg, targetColor, 4f, 0.005f));
+        StartCoroutine(UtilitiesGame.LerpColor(blackOverlayImg, targetColor, 4f, 0.005f));
     }
 
     public void HideBlackOverlay(GameEvent e)
     {
         IsProcessing = true;
         targetColor = new Color(0, 0, 0, 0);
-        StartCoroutine(Utilities.LerpColor(blackOverlayImg, targetColor, 4f, 0.005f));
+        StartCoroutine(UtilitiesGame.LerpColor(blackOverlayImg, targetColor, 4f, 0.005f));
     }
     
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 //#if UNITY_STANDALONE_WIN
@@ -11,15 +12,17 @@ public class GlobalVibrationManager : EventDrivenBehavior
     /**
      * Works for both vibration and rumble
      */
-    struct ShakeEvent
+    class ShakeEvent
     {
-        public int id;
+        public string id;
         public float intensity;
-
-        public ShakeEvent(int eventId, float intensity) : this()
+        public float duration;
+        public float elapsed;
+        public ShakeEvent(string eventId, float intensity, float duration)
         {
             this.id = eventId;
             this.intensity = intensity;
+            this.duration = duration;
         }
     }
 
@@ -34,6 +37,9 @@ public class GlobalVibrationManager : EventDrivenBehavior
     public bool AreEventsPaused = false;
     public bool IsShakeEnabled = true;
 
+    private static GlobalVibrationManager s_Instance;
+    protected GlobalVibrationManager() { }
+
     protected override void Start()
     {
         base.Start();
@@ -43,9 +49,18 @@ public class GlobalVibrationManager : EventDrivenBehavior
         AvailableIds = new Queue<int>();
     }
 
-    private void Awake()
+    public static GlobalVibrationManager GetInstance()
     {
-        //DontDestroyOnLoad(this);
+        if (s_Instance)
+            return s_Instance;
+        else
+            return null;
+    }
+
+    void Awake()
+    {
+        print("Vigration Controller instance is awake");
+        s_Instance = this;
     }
 
     protected override void InitEvents()
@@ -54,10 +69,10 @@ public class GlobalVibrationManager : EventDrivenBehavior
 
         print("Setting up Vibration Events with id " + GetInstanceID());
         
-        eventCtrl.SubscribeEvent(typeof(VibrationEvent), new GlobalEventController.Listener(GetInstanceID(), VibrationEventCallback));
+        /*eventCtrl.SubscribeEvent(typeof(VibrationEvent), new GlobalEventController.Listener(GetInstanceID(), VibrationEventCallback));
         eventCtrl.SubscribeEvent(typeof(VibrationOverEvent), new GlobalEventController.Listener(GetInstanceID(), VibrationOverEventCallback));
         eventCtrl.SubscribeEvent(typeof(RumbleEvent), new GlobalEventController.Listener(GetInstanceID(), RumbleEventCallback));
-        eventCtrl.SubscribeEvent(typeof(RumbleOverEvent), new GlobalEventController.Listener(GetInstanceID(), RumbleOverEventCallback));
+        eventCtrl.SubscribeEvent(typeof(RumbleOverEvent), new GlobalEventController.Listener(GetInstanceID(), RumbleOverEventCallback));*/
         eventCtrl.SubscribeEvent(typeof(ToggleShakeEvent), new GlobalEventController.Listener(GetInstanceID(), ToggleShakeEventCallback));
     }
 
@@ -67,10 +82,10 @@ public class GlobalVibrationManager : EventDrivenBehavior
 
         print("Destroying Vibration Events with id " + GetInstanceID());
 
-        eventCtrl.RemoveListener(typeof(VibrationEvent), VibrationEventCallback);
+        /*eventCtrl.RemoveListener(typeof(VibrationEvent), VibrationEventCallback);
         eventCtrl.RemoveListener(typeof(VibrationOverEvent), VibrationOverEventCallback);
         eventCtrl.RemoveListener(typeof(RumbleEvent), RumbleEventCallback);
-        eventCtrl.RemoveListener(typeof(RumbleOverEvent), RumbleOverEventCallback);
+        eventCtrl.RemoveListener(typeof(RumbleOverEvent), RumbleOverEventCallback);*/
         eventCtrl.RemoveListener(typeof(ToggleShakeEvent), ToggleShakeEventCallback);
     }
 
@@ -86,7 +101,27 @@ public class GlobalVibrationManager : EventDrivenBehavior
         float curRumble = 0;
         float curVibration = 0;
 
-        if(VibrationEvents.Count > 0) {
+        for (int i = 0; i < VibrationEvents.Count; i++)
+        {
+            VibrationEvents[i].elapsed += Time.deltaTime;
+            if (VibrationEvents[i].duration != -1 && VibrationEvents[i].elapsed >= VibrationEvents[i].duration)
+            {
+                VibrationEvents.RemoveAt(i);
+                i--;
+            }
+        }
+
+        for (int i = 0; i < RumbleEvents.Count; i++)
+        {
+            RumbleEvents[i].elapsed += Time.deltaTime;
+            if (RumbleEvents[i].duration != -1 && RumbleEvents[i].elapsed >= RumbleEvents[i].duration)
+            {
+                RumbleEvents.RemoveAt(i);
+                i--;
+            }
+        }
+
+        if (VibrationEvents.Count > 0) {
             curVibration = VibrationEvents[0].intensity;
         }
 
@@ -118,7 +153,7 @@ public class GlobalVibrationManager : EventDrivenBehavior
         IsShakeEnabled = ev.NewState;
     }
 
-    public void VibrationEventCallback(GameEvent e)
+    /*public void VibrationEventCallback(GameEvent e)
     {
         VibrationEvent ev = (VibrationEvent)e;
         ShakeEvent[] evArr = VibrationEvents.ToArray();
@@ -192,7 +227,7 @@ public class GlobalVibrationManager : EventDrivenBehavior
         if (RumbleEvents.Remove(sEv)) {
             AvailableIds.Enqueue(sEv.id);
         }
-    }
+    }*/
 
     private void OnApplicationFocus(bool focus)
     {
@@ -211,5 +246,37 @@ public class GlobalVibrationManager : EventDrivenBehavior
         VibrationEvents.Clear();
         RumbleEvents.Clear();
         GamePad.SetVibration((PlayerIndex)playerIdx, 0, 0);
+    }
+
+    public void AddVibrationEvent(float intensity, float duration, string eventId = "")
+    {
+        VibrationEvents.Add(new ShakeEvent(eventId, intensity, duration));
+
+        VibrationEvents.OrderByDescending(e => e.intensity);
+    }
+
+    public void AddRumbleEvent(float intensity, float duration, string eventId = "")
+    {
+        RumbleEvents.Add(new ShakeEvent(eventId, intensity, duration));
+
+        RumbleEvents.OrderByDescending(e => e.intensity);
+    }
+
+    public void RemoveVibrationEvent(string id)
+    {
+        ShakeEvent ev;
+        if ((ev = VibrationEvents.Find(e => e.id == id)) != null)
+        {
+            VibrationEvents.Remove(ev);
+        }
+    }
+
+    public void RemoveRumbleEvent(string id)
+    {
+        ShakeEvent ev;
+        if((ev = RumbleEvents.Find(e => e.id == id)) != null)
+        {
+            RumbleEvents.Remove(ev);
+        }
     }
 }
